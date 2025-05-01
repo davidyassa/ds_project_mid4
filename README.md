@@ -14,5 +14,3 @@ The main should take a string as input from the user, convert it to postfix nota
 - Floating point numbers 
 - Negative numbers 
 - Power operation `^` with higher priority than `* / %`
-
->>>>>>> 72c43b7be766e2406861959695641a2ffde5838a
