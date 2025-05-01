@@ -1,0 +1,14 @@
+main() test
+
+Stack* s = initialize();
+    push(s, 3.14);
+    push(s, 4.14);
+    push(s, 5.14);
+    push(s, 6.14);
+    push(s, 7.14);
+    printStack(s);
+    float a=pop(s);
+    printf("popped: %.2f\n",a);
+    a=pop(s);
+    printf("popped: %.2f\n",a);
+    printStack(s);
