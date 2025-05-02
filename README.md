@@ -1,16 +1,16 @@
-# ds_t4_assign.4
-Data Structure Assignment - Postfix Evaluation using Linked List Stack
+# Infix To Postfix Converter - Data Structures Project
+### Infix to Postfix Conversion, and Postfix Evaluation, using Linked List Stack
 
-Students David Michael 9299 and Ziad AbdElhaleem 9634
+**Students:** David Michael and Ziad AbdElhaleem  
+**Institution:** Faculty of Engineering, University of Alexandria
 
-**Assignment:**
+### 🔧 Functionality 
+The main function should take a string as input from the user, convert it to postfix notation using `infixToPostfix()`, and then call `evaluatePostfix()`.
 
-The main should take a string as input from the user, convert it to postfix notation using infixToPostfix(), and then call evaluatePostfix().
-
-**Cases that must be handled in the program:**
+### ✅ Cases handled in the program:  
 - Single-digit numbers 
 - Multi-digit numbers 
-- Brackets 
+- Brackets `()`
 - Floating point numbers 
 - Negative numbers 
 - Power operation `^` with higher priority than `* / %`
