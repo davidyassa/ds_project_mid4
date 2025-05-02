@@ -2,10 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include <float.h>
-typedef struct
+#include <math.h>
+typedef struct Node
 {
-    char data;
+    float data;
     struct Node *next;
 } Node;
 
@@ -33,7 +33,7 @@ Stack *initialize()
     return s;
 }
 
-Node *newNode(char x)
+Node *newNode(float x)
 {
     Node *n = malloc(sizeof(Node));
     n->data = x;
@@ -41,7 +41,7 @@ Node *newNode(char x)
     return n;
 }
 
-void insertAtBeginning(LinkedList *l, char x)
+void insertAtBeginning(LinkedList *l, float x)
 {
     Node *n = newNode(x);
     if (l->head == NULL)
@@ -58,7 +58,7 @@ void displayList(LinkedList *l)
     Node *temp = l->head;
     while (temp != NULL)
     {
-        printf("%c ", temp->data);
+        printf("%.2f ", temp->data);
         temp = temp->next;
     }
     printf("\n");
@@ -74,30 +74,38 @@ void deleteFromBegining(LinkedList *l)
     }
 }
 
-char pop(Stack *s)
+int isEmpty(Stack *s)
+{
+    int e = s->l->head == NULL;
+    return e;
+}
+
+float pop(Stack *s)
 {
     if (isEmpty(s))
-        return '\0';
-    char f = s->l->head->data;
+    {
+        printf("Error: Stack underflow\n");
+        exit(1);
+    }
+    float f = s->l->head->data;
     deleteFromBegining(s->l);
     return f;
 }
 
-void push(Stack *s, char value)
+void push(Stack *s, float value)
 {
     insertAtBeginning(s->l, value);
 }
 
-char peek(Stack *s)
+float peek(Stack *s)
 {
     if (isEmpty(s))
-        return '\0';
-    return s->l->head->data;
-}
-
-int isEmpty(Stack *s)
-{
-    return s->l->head == NULL;
+    {
+        printf("Error: Stack underflow\n");
+        exit(1);
+    }
+    float f = s->l->head->data;
+    return f;
 }
 
 void printStack(Stack *s)
@@ -105,194 +113,152 @@ void printStack(Stack *s)
     displayList(s->l);
 }
 
-typedef struct FloatNode
+int isOperator(char ch)
 {
-    float data;
-    struct FloatNode *next;
-} FloatNode;
-
-typedef struct
-{
-    FloatNode *head;
-} FloatStack;
-
-FloatStack *initFloatStack()
-{
-    FloatStack *s = (FloatStack *)malloc(sizeof(FloatStack));
-    s->head = NULL;
-    return s;
+    return ch == '+' || ch == '-' || ch == '*' || ch == '/' || ch == '^' || ch == '%';
 }
 
-void pushFloat(FloatStack *s, float value)
+int precedence(char op)
 {
-    FloatNode *n = (FloatNode *)malloc(sizeof(FloatNode));
-    n->data = value;
-    n->next = s->head;
-    s->head = n;
-}
-
-float popFloat(FloatStack *s)
-{
-    if (isEmptyFloat(s))
+    switch (op)
     {
-        return DBL_MIN;
-    }
-    float val = s->head->data;
-    FloatNode *temp = s->head;
-    s->head = s->head->next;
-    free(temp);
-    return val;
-}
-
-int isEmptyFloat(FloatStack *s)
-{
-    return s->head == NULL;
-}
-
-int priority(char op)
-{
-    if (op == '+' || op == '-')
-        return 1;
-    if (op == '*' || op == '/')
+    case '^':
+        return 4;
+    case '*':
+    case '/':
+    case '%':
+        return 3;
+    case '+':
+    case '-':
         return 2;
-    return 0;
-}
-
-int isOperator(char c)
-{
-    return c == '+' || c == '-' || c == '*' || c == '/';
+    default:
+        return 0;
+    }
 }
 
 char *infixTopostfix(char *infix)
 {
-    int j = 0;
+    Stack *opStack = initialize();
     char *post = malloc(strlen(infix) * 4);
-    Stack *s = initialize();
+    char *token = strtok(infix, " ");
+    int pos = 0;
 
-    for (int i = 0; i < strlen(infix); i++)
+    while (token != NULL)
     {
-        if (isspace(infix[i]))
-            continue;
+        if (isdigit(token[0]) || (token[0] == '-' && strlen(token) > 1))
+            pos += sprintf(post + pos, "%s ", token);
 
-        if (infix[i] == '-' && (i == 0 || infix[i - 1] == '(' || isOperator(infix[i - 1]) || isspace(infix[i - 1])))
+        else if (token[0] == '(')
         {
-            post[j++] = infix[i++];
-            while (i < strlen(infix) && (isdigit(infix[i]) || infix[i] == '.'))
+            push(opStack, '(');
+        }
+        else if (token[0] == ')')
+        {
+            while (!isEmpty(opStack))
             {
-                post[j++] = infix[i++];
+                char op = (char)pop(opStack);
+                if (op == '(')
+                    break;
+                pos += sprintf(post + pos, "%c ", op);
             }
-            post[j++] = ' ';
-            i--;
         }
-        else if (isdigit(infix[i]))
+        else if (isOperator(token[0]))
         {
-            while (i < strlen(infix) && (isdigit(infix[i]) || infix[i] == '.'))
+            if (token[0] == '-' && (strlen(token) > 1 || pos == 0 || post[pos - 2] == '('))
+                pos += sprintf(post + pos, "%s ", token);
+
+            else
             {
-                post[j++] = infix[i++];
+                while (!isEmpty(opStack) && precedence((char)peek(opStack)) >= precedence(token[0]))
+                {
+                    char op = (char)pop(opStack);
+                    pos += sprintf(post + pos, "%c ", op);
+                }
+                push(opStack, token[0]);
             }
-            post[j++] = ' ';
-            i--;
         }
-        else if (infix[i] == '.')
-        {
-            post[j++] = '0';
-            post[j++] = infix[i++];
-            while (i < strlen(infix) && isdigit(infix[i]))
-            {
-                post[j++] = infix[i++];
-            }
-            post[j++] = ' ';
-            i--;
-        }
-        else if (infix[i] == '(')
-        {
-            push(s, infix[i]);
-        }
-        else if (infix[i] == ')')
-        {
-            while (!isEmpty(s) && peek(s) != '(')
-            {
-                post[j++] = pop(s);
-                post[j++] = ' ';
-            }
-            if (!isEmpty(s))
-                pop(s);
-        }
-        else
-        {
-            while (!isEmpty(s) && priority(peek(s)) >= priority(infix[i]))
-            {
-                post[j++] = pop(s);
-                post[j++] = ' ';
-            }
-            push(s, infix[i]);
-        }
+        token = strtok(NULL, " ");
     }
-
-    while (!isEmpty(s))
+    while (!isEmpty(opStack))
     {
-        post[j++] = pop(s);
-        post[j++] = ' ';
+        char op = (char)pop(opStack);
+        pos += sprintf(post + pos, "%c ", op);
     }
-
-    post[j] = '\0';
+    post[pos] = '\0';
+    while (!isEmpty(opStack))
+        pop(opStack);
+    free(opStack->l);
+    free(opStack);
     return post;
-}
-
-float eval(char x, float op1, float op2)
-{
-    if (x == '+')
-        return (op1 + op2);
-    if (x == '-')
-        return (op1 - op2);
-    if (x == '*')
-        return (op1 * op2);
-    if (x == '/')
-        return (op1 / op2);
 }
 
 float evaluatePostfix(char *postfix)
 {
-    FloatStack *s = initFloatStack();
-    float op1, op2, val;
+    Stack *evalStack = initialize();
     char *token = strtok(postfix, " ");
 
     while (token != NULL)
     {
-        if (isOperator(token[0]) && strlen(token) == 1)
+        if (isdigit(token[0]) || (token[0] == '-' && token[1] != '\0'))
         {
-            op2 = popFloat(s);
-            op1 = popFloat(s);
-            val = eval(token[0], op1, op2);
-            pushFloat(s, val);
+            float num = atof(token);
+            push(evalStack, num);
         }
-        else
+        else if (isOperator(token[0]))
         {
-            float num = strtof(token, NULL);
-            pushFloat(s, num);
-        }
+            float op2 = pop(evalStack);
+            float op1 = pop(evalStack);
+            float res;
 
+            switch (token[0])
+            {
+            case '+':
+                res = op1 + op2;
+                break;
+            case '-':
+                res = op1 - op2;
+                break;
+            case '*':
+                res = op1 * op2;
+                break;
+            case '/':
+                res = op1 / op2;
+                break;
+            case '%':
+                res = fmod(op1, op2);
+                break;
+            case '^':
+                res = pow(op1, op2);
+                break;
+            default:
+                break;
+            }
+            push(evalStack, res);
+        }
         token = strtok(NULL, " ");
     }
 
-    return popFloat(s);
+    float fres = pop(evalStack);
+    free(evalStack);
+    return fres;
 }
 
 void Evaluate(char *infix)
 {
     char *postfix = infixTopostfix(infix);
-    printf("Postfix Expression: %s\n", postfix);
+    printf("Output (Postfix): %s\n", postfix);
     float res = evaluatePostfix(postfix);
-    printf("\nResult: %.2f\n", res);
+    printf("\nResult: %.4f\n", res);
     free(postfix);
 }
 
 int main()
 {
-    char infix[100];
+    char infix[1000];
     printf("Welcome To The Fourth Assignment\n\n");
-    printf("Enter infix expression: ");
+    printf("Enter infix expression (with spaces between tokens): ");
     fgets(infix, sizeof(infix), stdin);
+    infix[strcspn(infix, "\n")] = '\0';
     Evaluate(infix);
     return 0;
 }
