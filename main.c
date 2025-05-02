@@ -76,6 +76,8 @@ void deleteFromBegining(LinkedList *l)
 
 char pop(Stack *s)
 {
+    if (isEmpty(s))
+        return '\0';
     char f = s->l->head->data;
     deleteFromBegining(s->l);
     return f;
@@ -88,6 +90,8 @@ void push(Stack *s, char value)
 
 char peek(Stack *s)
 {
+    if (isEmpty(s))
+        return '\0';
     return s->l->head->data;
 }
 
