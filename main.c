@@ -44,7 +44,7 @@ Node *newNode(float x)
 void insertAtBeginning(LinkedList *l, float x)
 {
     Node *n = newNode(x);
-    if (l->head == NULL)
+    if (l->head == NULL) //if list empty
         l->head = n;
     else
     {
@@ -73,6 +73,8 @@ void deleteFromBegining(LinkedList *l)
         free(temp);
     }
 }
+
+//Stack Implementation Using Linked List
 
 int isEmpty(Stack *s)
 {
@@ -125,14 +127,14 @@ int precedence(char op)
     switch (op)
     {
     case '^':
-        return 4;
+        return 3;
     case '*':
     case '/':
     case '%':
-        return 3;
+        return 2;
     case '+':
     case '-':
-        return 2;
+        return 1;
     default:
         return 0;
     }
