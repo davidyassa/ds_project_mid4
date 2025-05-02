@@ -44,7 +44,7 @@ Node *newNode(float x)
 void insertAtBeginning(LinkedList *l, float x)
 {
     Node *n = newNode(x);
-    if (l->head == NULL) //if list empty
+    if (l->head == NULL) // if list empty
         l->head = n;
     else
     {
@@ -74,12 +74,11 @@ void deleteFromBegining(LinkedList *l)
     }
 }
 
-//Stack Implementation Using Linked List
+// Stack Implementation Using Linked List
 
 int isEmpty(Stack *s)
 {
-    int e = s->l->head == NULL;
-    return e;
+    return s->l->head == NULL;
 }
 
 float pop(Stack *s)
@@ -106,8 +105,7 @@ float peek(Stack *s)
         printf("Error: Stack underflow\n");
         exit(1);
     }
-    float f = s->l->head->data;
-    return f;
+    return s->l->head->data;
 }
 
 void printStack(Stack *s)
