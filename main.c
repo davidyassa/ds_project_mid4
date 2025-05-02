@@ -113,11 +113,13 @@ void printStack(Stack *s)
     displayList(s->l);
 }
 
+// Helper function to check if a character is an operator
 int isOperator(char ch)
 {
     return ch == '+' || ch == '-' || ch == '*' || ch == '/' || ch == '^' || ch == '%';
 }
 
+// Helper function to get precedence of operators
 int precedence(char op)
 {
     switch (op)
@@ -136,6 +138,7 @@ int precedence(char op)
     }
 }
 
+// Part 2: Infix to Postfix conversion
 char *infixTopostfix(char *infix)
 {
     Stack *opStack = initialize();
@@ -146,7 +149,10 @@ char *infixTopostfix(char *infix)
     while (token != NULL)
     {
         if (isdigit(token[0]) || (token[0] == '-' && strlen(token) > 1))
+        {
+            // It's a number (possibly negative or float)
             pos += sprintf(post + pos, "%s ", token);
+        }
 
         else if (token[0] == '(')
         {
@@ -154,6 +160,7 @@ char *infixTopostfix(char *infix)
         }
         else if (token[0] == ')')
         {
+            // Pop until we find the opening parenthesis
             while (!isEmpty(opStack))
             {
                 char op = (char)pop(opStack);
@@ -164,11 +171,16 @@ char *infixTopostfix(char *infix)
         }
         else if (isOperator(token[0]))
         {
+            // Handle negative numbers (unary minus)
             if (token[0] == '-' && (strlen(token) > 1 || pos == 0 || post[pos - 2] == '('))
+            {
+                // It's a negative number, not an operator
                 pos += sprintf(post + pos, "%s ", token);
+            }
 
             else
             {
+                // It's an operator
                 while (!isEmpty(opStack) && precedence((char)peek(opStack)) >= precedence(token[0]))
                 {
                     char op = (char)pop(opStack);
@@ -179,12 +191,17 @@ char *infixTopostfix(char *infix)
         }
         token = strtok(NULL, " ");
     }
+
+    // Pop all remaining operators
     while (!isEmpty(opStack))
     {
         char op = (char)pop(opStack);
         pos += sprintf(post + pos, "%c ", op);
     }
-    post[pos] = '\0';
+
+    post[pos] = '\0'; // Null-terminate the string
+
+    // Cleanup
     while (!isEmpty(opStack))
         pop(opStack);
     free(opStack->l);
@@ -192,6 +209,7 @@ char *infixTopostfix(char *infix)
     return post;
 }
 
+// Evaluate a postfix expression and return the result
 float evaluatePostfix(char *postfix)
 {
     Stack *evalStack = initialize();
@@ -201,11 +219,13 @@ float evaluatePostfix(char *postfix)
     {
         if (isdigit(token[0]) || (token[0] == '-' && token[1] != '\0'))
         {
+            // It's a number
             float num = atof(token);
             push(evalStack, num);
         }
         else if (isOperator(token[0]))
         {
+            // It's an operator - pop two operands and apply the operation
             float op2 = pop(evalStack);
             float op1 = pop(evalStack);
             float res;
@@ -238,11 +258,12 @@ float evaluatePostfix(char *postfix)
         token = strtok(NULL, " ");
     }
 
-    float fres = pop(evalStack);
+    float fres = pop(evalStack); // Final result
     free(evalStack);
     return fres;
 }
 
+// Wrapper function: convert infix to postfix, evaluate it, and print results
 void Evaluate(char *infix)
 {
     char *postfix = infixTopostfix(infix);
